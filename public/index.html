@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube 24/7 Live Streaming</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="12" fill="url(#gradient1)" />
+          <path d="M28 20L16 27V13L28 20Z" fill="white" />
+          <defs>
+            <linearGradient id="gradient1" x1="0" y1="0" x2="40" y2="40">
+              <stop offset="0%" stop-color="#FF0000" />
+              <stop offset="100%" stop-color="#CC0000" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <h1>YouTube 24/7 Live Stream</h1>
+      </div>
+      <div class="header-controls">
+        <select id="languageSelect" class="lang-select">
+          <option value="en">🇺🇸 EN</option>
+          <option value="id">🇮🇩 ID</option>
+        </select>
+        <div class="status-indicator" id="statusIndicator">
+          <div class="status-dot"></div>
+          <span data-i18n="statusOffline">Offline</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- Stream Configuration -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header">
+            <h2 data-i18n="streamConfigTitle">⚙️ Stream Configuration</h2>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-group">
+            <label for="streamKey" data-i18n="streamKeyLabel">YouTube Stream Key</label>
+            <input type="password" id="streamKey" placeholder="xxxx-xxxx-xxxx-xxxx-xxxx">
+            <small><span data-i18n="streamKeyHelp">Get stream key from</span> <a
+                href="https://studio.youtube.com/channel/UC/livestreaming" target="_blank">YouTube Studio</a></small>
+          </div>
+
+          <div class="form-group">
+            <label for="duration" data-i18n="durationLabel">Stream Duration (Hours)</label>
+            <div class="duration-controls">
+              <input type="number" id="duration" min="0" value="0" placeholder="0">
+              <label class="checkbox-label">
+                <input type="checkbox" id="infiniteLoop" checked>
+                <span data-i18n="infiniteLoop">Infinite Loop 24/7</span>
+              </label>
+            </div>
+            <small data-i18n="durationHelp">Set 0 or check infinite for unlimited streaming</small>
+          </div>
+
+          <div class="form-group">
+            <label for="quality">Stream Quality</label>
+            <select id="quality" class="quality-select">
+              <option value="1080p">1080p HD - 3000 kbps (butuh ~5 Mbps upload)</option>
+              <option value="720p">720p - 2000 kbps (butuh ~3.5 Mbps upload)</option>
+              <option value="480p">480p - 1000 kbps (butuh ~2 Mbps upload)</option>
+              <option value="360p">360p - 600 kbps (butuh ~1.5 Mbps upload)</option>
+              <option value="custom">Custom bitrate...</option>
+            </select>
+            <div id="customBitrateSection" style="display: none; margin-top: 0.75rem;">
+              <input type="number" id="customBitrate" min="500" max="10000" value="3000" placeholder="3000">
+              <small data-i18n="customBitrateHelp">Custom bitrate in kbps (500-10000)</small>
+            </div>
+            <small data-i18n="qualityHelp">Select quality according to your internet bandwidth</small>
+          </div>
+
+          <div class="form-group">
+            <label for="fps">Frame Rate (FPS)</label>
+            <select id="fps" class="quality-select">
+              <option value="30">30 FPS (Standard)</option>
+              <option value="60">60 FPS (Smooth)</option>
+              <option value="24">24 FPS (Cinematic)</option>
+            </select>
+            <small data-i18n="fpsHelp">60 FPS requires higher bitrate</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Video Management -->
+      <div class="card">
+        <div class="card-header">
+          <h2 data-i18n="videoMgmtTitle">🎬 Video Management</h2>
+        </div>
+        <div class="card-body">
+          <div class="upload-zone" id="videoUploadZone">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <h3 data-i18n="uploadVideoTitle">Upload Video Files</h3>
+            <p data-i18n="uploadVideoDesc">Drag & drop or click to upload</p>
+            <input type="file" id="videoInput" accept="video/*" multiple hidden>
+            <button class="btn-secondary" onclick="document.getElementById('videoInput').click()"
+              data-i18n="selectVideoBtn">
+              Select Video
+            </button>
+          </div>
+
+          <div class="video-list" id="videoList">
+            <!-- Videos will be listed here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio Settings -->
+      <div class="card">
+        <div class="card-header">
+          <h2 data-i18n="audioSettingsTitle">🎵 Audio Settings</h2>
+        </div>
+        <div class="card-body">
+          <label class="checkbox-label">
+            <input type="checkbox" id="muteVideo">
+            <span data-i18n="muteVideoLabel">Mute Video Audio</span>
+          </label>
+
+          <div class="audio-upload" id="audioUploadSection" style="display: none;">
+            <div class="upload-zone small" id="audioUploadZone">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+              </svg>
+              <h3 data-i18n="uploadAudioTitle">Upload Audio File</h3>
+              <p data-i18n="uploadAudioDesc">MP3, WAV, or other audio formats</p>
+              <input type="file" id="audioInput" accept="audio/*" hidden>
+              <button class="btn-secondary" onclick="document.getElementById('audioInput').click()"
+                data-i18n="selectAudioBtn">
+                Select Audio
+              </button>
+            </div>
+
+            <div class="audio-file" id="audioFileDisplay" style="display: none;">
+              <!-- Audio file info will be displayed here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stream Control -->
+      <div class="card">
+        <div class="card-header">
+          <h2 data-i18n="streamControlTitle">🎮 Stream Control</h2>
+        </div>
+        <div class="card-body">
+          <div class="stream-stats" id="streamStats">
+            <div class="stat">
+              <div class="stat-label" data-i18n="statStatus">Status</div>
+              <div class="stat-value" id="statStatus">Stopped</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label" data-i18n="statCurrentVideo">Current Video</div>
+              <div class="stat-value" id="statVideo">-</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label" data-i18n="statElapsedTime">Elapsed Time</div>
+              <div class="stat-value" id="statTime">00:00:00</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label" data-i18n="statVideosQueued">Videos Queued</div>
+              <div class="stat-value" id="statCount">0</div>
+            </div>
+          </div>
+
+          <div class="control-buttons">
+            <button class="btn-primary" id="startBtn" onclick="startStream()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3" />
+              </svg>
+              <span data-i18n="startStreamBtn">Start Streaming</span>
+            </button>
+            <button class="btn-danger" id="stopBtn" onclick="stopStream()" disabled>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" />
+              </svg>
+              <span data-i18n="stopStreamBtn">Stop Streaming</span>
+            </button>
+          </div>
+
+          <div class="alerts" id="alerts"></div>
+
+          <div class="health-indicators" id="healthIndicators" style="display: none;">
+            <div class="health-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+              </svg>
+              <span class="health-label">Connection</span>
+              <span class="health-value" id="healthConnection">Good</span>
+            </div>
+            <div class="health-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2" />
+                <rect x="9" y="9" width="6" height="6" />
+                <line x1="9" y1="1" x2="9" y2="4" />
+                <line x1="15" y1="1" x2="15" y2="4" />
+                <line x1="9" y1="20" x2="9" y2="23" />
+                <line x1="15" y1="20" x2="15" y2="23" />
+                <line x1="20" y1="9" x2="23" y2="9" />
+                <line x1="20" y1="14" x2="23" y2="14" />
+                <line x1="1" y1="9" x2="4" y2="9" />
+                <line x1="1" y1="14" x2="4" y2="14" />
+              </svg>
+              <span class="health-label">CPU</span>
+              <span class="health-value" id="healthCPU">0%</span>
+            </div>
+            <div class="health-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" />
+              </svg>
+              <span class="health-label">FPS</span>
+              <span class="health-value" id="healthFPS">30</span>
+            </div>
+            <div class="health-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              <span class="health-label">Bitrate</span>
+              <span class="health-value" id="healthBitrate">0 kbps</span>
+            </div>
+            <div class="health-item">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              <span class="health-label">Duration</span>
+              <span class="health-value" id="healthDuration">00:00:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p data-i18n="footerFFmpeg">💡 Ensure FFmpeg is installed on your system</p>
+      <p data-i18n="footerDashboard">📺 Stream will appear in your YouTube Live Dashboard after a few seconds</p>
+    </footer>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

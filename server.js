@@ -85,6 +85,11 @@ app.post('/api/upload/video', upload.single('video'), (req, res) => {
   const thumbnailPath = path.join(uploadsDir, 'thumbnails', thumbnailFilename);
 
   ffmpeg(req.file.path)
+    .on('error', (err) => {
+      console.error('Thumbnail generation error:', err.message);
+      // Don't crash, just continue without thumbnail
+      videoInfo.thumbnail = null;
+    })
     .screenshots({
       timestamps: ['50%'],
       filename: thumbnailFilename,

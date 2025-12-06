@@ -232,7 +232,7 @@ app.delete('/api/audio', (req, res) => {
 
 // Start stream
 app.post('/api/stream/start', (req, res) => {
-  const { streamKey, duration, muteVideo, loopMode, bitrate, fps } = req.body;
+  const { streamKey, duration, muteVideo, loopMode, bitrate, fps, platform } = req.body;
 
   if (!streamKey) {
     return res.status(400).json({ error: 'Stream key is required' });
@@ -248,6 +248,7 @@ app.post('/api/stream/start', (req, res) => {
 
   streamState.config = {
     streamKey,
+    platform: platform || 'youtube', // Default to youtube for backward compatibility
     duration: duration || 0, // 0 means infinite
     muteVideo: muteVideo || false,
     loopMode: loopMode || 'infinite',
@@ -342,7 +343,18 @@ function startStream() {
   streamState.isStreaming = true;
   streamState.startTime = Date.now();
 
-  const rtmpUrl = `rtmp://a.rtmp.youtube.com/live2/${streamState.config.streamKey}`;
+  // Generate RTMP URL based on platform
+  const platform = streamState.config.platform || 'youtube';
+  let rtmpUrl;
+
+  if (platform === 'facebook') {
+    rtmpUrl = `rtmps://live-api-s.facebook.com:443/rtmp/${streamState.config.streamKey}`;
+  } else {
+    // Default to YouTube
+    rtmpUrl = `rtmp://a.rtmp.youtube.com/live2/${streamState.config.streamKey}`;
+  }
+
+  console.log(`Starting stream to ${platform.toUpperCase()} Live...`);
 
   // Create playlist file for multiple videos
   const playlistPath = path.join(uploadsDir, 'playlist.txt');

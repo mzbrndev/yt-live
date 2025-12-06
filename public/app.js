@@ -23,6 +23,8 @@ const audioUploadSection = document.getElementById('audioUploadSection');
 const audioFileDisplay = document.getElementById('audioFileDisplay');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
+const platformSelect = document.getElementById('platform');
+const streamKeyLink = document.getElementById('streamKeyLink');
 const statusIndicator = document.getElementById('statusIndicator');
 const alerts = document.getElementById('alerts');
 
@@ -46,7 +48,9 @@ const translations = {
     en: {
         statusOffline: 'Offline',
         streamConfigTitle: '⚙️ Stream Configuration',
-        streamKeyLabel: 'YouTube Stream Key',
+        platformLabel: 'Streaming Platform',
+        platformHelp: 'Select your streaming platform',
+        streamKeyLabel: 'Stream Key',
         streamKeyHelp: 'Get stream key from',
         durationLabel: 'Stream Duration (Hours)',
         infiniteLoop: 'Infinite Loop 24/7',
@@ -73,15 +77,15 @@ const translations = {
         startStreamBtn: 'Start Streaming',
         stopStreamBtn: 'Stop Streaming',
         footerFFmpeg: '💡 Ensure FFmpeg is installed on your system',
-        footerDashboard: '📺 Stream will appear in your YouTube Live Dashboard after a few seconds',
+        footerDashboard: '📺 Stream will appear in your platform\'s Live Dashboard after a few seconds',
         alertUploadVideo: 'Uploading',
         alertUploadSuccess: 'uploaded successfully!',
         alertUploadFail: 'Failed to upload',
         alertRemoveVideo: 'Video removed',
         alertRemoveFail: 'Failed to remove video',
-        alertStreamStarted: 'Stream started! Check your YouTube Live Dashboard',
+        alertStreamStarted: 'Stream started! Check your Live Dashboard',
         alertStreamStopped: 'Stream stopped',
-        alertEnterKey: 'Please enter YouTube stream key',
+        alertEnterKey: 'Please enter stream key',
         alertUploadOne: 'Please upload at least one video',
         alertMuteWarning: 'Video will be muted but no audio file uploaded',
         changeThumbnail: 'Change Thumbnail'
@@ -89,7 +93,9 @@ const translations = {
     id: {
         statusOffline: 'Offline',
         streamConfigTitle: '⚙️ Konfigurasi Stream',
-        streamKeyLabel: 'Stream Key YouTube',
+        platformLabel: 'Platform Streaming',
+        platformHelp: 'Pilih platform streaming Anda',
+        streamKeyLabel: 'Stream Key',
         streamKeyHelp: 'Dapatkan stream key dari',
         durationLabel: 'Durasi Stream (Jam)',
         infiniteLoop: 'Loop Tak Terbatas 24/7',
@@ -116,15 +122,15 @@ const translations = {
         startStreamBtn: 'Mulai Streaming',
         stopStreamBtn: 'Hentikan Streaming',
         footerFFmpeg: '💡 Pastikan FFmpeg sudah terinstall di sistem Anda',
-        footerDashboard: '📺 Stream akan muncul di Dashboard YouTube Live Anda dalam beberapa detik',
+        footerDashboard: '📺 Stream akan muncul di Dashboard Live platform Anda dalam beberapa detik',
         alertUploadVideo: 'Mengupload',
         alertUploadSuccess: 'berhasil diupload!',
         alertUploadFail: 'Gagal mengupload',
         alertRemoveVideo: 'Video dihapus',
         alertRemoveFail: 'Gagal menghapus video',
-        alertStreamStarted: 'Stream dimulai! Cek Dashboard YouTube Live Anda',
+        alertStreamStarted: 'Stream dimulai! Cek Dashboard Live Anda',
         alertStreamStopped: 'Stream dihentikan',
-        alertEnterKey: 'Mohon masukkan stream key YouTube',
+        alertEnterKey: 'Mohon masukkan stream key',
         alertUploadOne: 'Mohon upload setidaknya satu video',
         alertMuteWarning: 'Video akan dibisukan tapi tidak ada file audio yang diupload',
         changeThumbnail: 'Ganti Thumbnail'
@@ -134,10 +140,38 @@ const translations = {
 let currentLang = 'en';
 
 // Initialize
-// Initialize
 loadFiles();
 loadStreamKey();
+loadPlatform();
 loadLanguage();
+
+function loadPlatform() {
+    const savedPlatform = localStorage.getItem('yt_stream_platform');
+    if (savedPlatform && (savedPlatform === 'youtube' || savedPlatform === 'facebook')) {
+        platformSelect.value = savedPlatform;
+    }
+    updatePlatformHelp();
+}
+
+function savePlatform() {
+    const platform = platformSelect.value;
+    localStorage.setItem('yt_stream_platform', platform);
+    updatePlatformHelp();
+}
+
+function updatePlatformHelp() {
+    const platform = platformSelect.value;
+    if (platform === 'facebook') {
+        streamKeyLink.href = 'https://www.facebook.com/live/producer';
+        streamKeyLink.textContent = 'Facebook Live Producer';
+    } else {
+        streamKeyLink.href = 'https://studio.youtube.com/channel/UC/livestreaming';
+        streamKeyLink.textContent = 'YouTube Studio';
+    }
+}
+
+// Platform change listener
+platformSelect.addEventListener('change', savePlatform);
 
 function loadLanguage() {
     const savedLang = localStorage.getItem('yt_stream_lang');
@@ -493,6 +527,7 @@ async function startStream() {
             },
             body: JSON.stringify({
                 streamKey,
+                platform: platformSelect.value,
                 duration,
                 muteVideo,
                 loopMode: 'infinite',

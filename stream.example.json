@@ -1,10 +1,11 @@
 {
+    "platform": "youtube",
     "streamKey": "YOUR_STREAM_KEY_HERE",
     "videos": [
-        "uploads/videos/video1.mp4",
-        "uploads/videos/video2.mp4"
+        "video1.mp4",
+        "video2.mp4"
     ],
-    "audio": "uploads/audio/bgm.mp3",
+    "audio": "bgm.mp3",
     "muteVideo": true,
     "duration": 0,
     "bitrate": 3000,

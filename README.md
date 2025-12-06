@@ -1,9 +1,10 @@
-# 🎬 YouTube 24/7 Live Streaming Application
+# 🎬 YouTube & Facebook 24/7 Live Streaming Application
 
-Aplikasi web untuk streaming video ke YouTube Live secara 24/7 dengan fitur loop otomatis, penggantian audio, dan kontrol durasi.
+Aplikasi web untuk streaming video ke YouTube Live atau Facebook Live secara 24/7 dengan fitur loop otomatis, penggantian audio, dan kontrol durasi.
 
 ## ✨ Fitur Utama
 
+- 🎯 **Multi-Platform** - Stream ke YouTube Live atau Facebook Live
 - 🔄 **Loop 24/7** - Stream single atau multiple video secara berulang tanpa henti
 - 🎵 **Audio Replacement** - Mute audio video dan ganti dengan file audio pilihan Anda
 - ⏱️ **Duration Control** - Set durasi streaming (X jam) atau infinite loop 24/7
@@ -98,7 +99,15 @@ npm run pm2:start
 
 ## 🎨 Web GUI Mode
 
-### 1. Dapatkan YouTube Stream Key
+### 1. Pilih Platform Streaming
+
+Pilih platform streaming Anda:
+- **YouTube Live** - untuk streaming ke YouTube
+- **Facebook Live** - untuk streaming ke Facebook
+
+### 2. Dapatkan Stream Key
+
+#### YouTube Stream Key:
 
 1. Buka [YouTube Studio](https://studio.youtube.com/)
 2. Pilih menu **Live Streaming** atau **Go Live**
@@ -106,7 +115,15 @@ npm run pm2:start
 4. Copy **Stream Key** Anda
 5. ⚠️ **Penting:** Jangan share stream key ke siapa pun!
 
-### 2. Upload Video
+#### Facebook Stream Key:
+
+1. Buka [Facebook Live Producer](https://www.facebook.com/live/producer)
+2. Pilih halaman/profil yang ingin digunakan untuk streaming
+3. Pilih **"Streaming Software"** atau **"Use Stream Key"**
+4. Copy **Stream Key** yang diberikan
+5. ⚠️ **Penting:** Jangan share stream key ke siapa pun!
+
+### 3. Upload Video
 
 1. Klik atau drag & drop video files ke upload zone
 2. Anda bisa upload multiple videos untuk playlist
@@ -146,20 +163,23 @@ CLI mode memungkinkan Anda menjalankan streaming dari terminal tanpa perlu web i
 ### Basic Usage
 
 ```bash
-# Single video, infinite loop
-npm run cli -- --key "YOUR_STREAM_KEY" --video "video.mp4"
+# Stream to YouTube (default)
+npm run cli -- --key "YOUR_YT_KEY" --video "video.mp4"
 
-# Multiple videos
+# Stream to Facebook
+npm run cli -- --platform facebook --key "YOUR_FB_KEY" --video "video.mp4"
+
+# Multiple videos to YouTube
 npm run cli -- --key "YOUR_KEY" --video "video1.mp4,video2.mp4"
 
-# Dengan audio replacement
-npm run cli -- --key "YOUR_KEY" --video "video.mp4" --audio "bgm.mp3" --mute-video
+# Facebook dengan audio replacement
+npm run cli -- --platform facebook --key "YOUR_KEY" --video "video.mp4" --audio "bgm.mp3" --mute-video
 
-# Stream selama 24 jam
+# Stream selama 24 jam ke YouTube
 npm run cli -- --key "YOUR_KEY" --video "video.mp4" --duration 24
 
-# Custom bitrate dan FPS
-npm run cli -- --key "YOUR_KEY" --video "video.mp4" --bitrate 1500 --fps 25
+# Custom bitrate dan FPS untuk Facebook
+npm run cli -- --platform facebook --key "YOUR_KEY" --video "video.mp4" --bitrate 1500 --fps 25
 ```
 
 ### Menggunakan Config File
@@ -168,6 +188,7 @@ Buat file `stream.json`:
 
 ```json
 {
+  "platform": "youtube",
   "streamKey": "YOUR_STREAM_KEY",
   "videos": ["video1.mp4", "video2.mp4"],
   "audio": "bgm.mp3",
@@ -187,7 +208,8 @@ npm run cli -- --config stream.json
 
 | Option | Alias | Description | Default |
 |--------|-------|-------------|---------|
-| `--key` | `-k` | YouTube stream key (required) | - |
+| `--key` | `-k` | Stream key (required) | - |
+| `--platform` | `-p` | Platform: youtube or facebook | youtube |
 | `--video` | `-v` | Video file(s), comma-separated (required) | - |
 | `--audio` | `-a` | Audio file untuk replacement | - |
 | `--mute-video` | - | Mute audio video original | false |

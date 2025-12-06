@@ -9,6 +9,7 @@ function parseArgs() {
     const args = process.argv.slice(2);
     const config = {
         streamKey: null,
+        platform: 'youtube',
         videos: [],
         audio: null,
         muteVideo: false,
@@ -56,6 +57,11 @@ function parseArgs() {
                 config.fps = parseInt(nextArg, 10);
                 i++;
                 break;
+            case '--platform':
+            case '-p':
+                config.platform = nextArg;
+                i++;
+                break;
             case '--config':
             case '-c':
                 config.configFile = nextArg;
@@ -80,14 +86,15 @@ function parseArgs() {
 
 function showHelp() {
     console.log(`
-🎬 YouTube 24/7 Live Streaming - CLI Mode
+🎬 YouTube & Facebook 24/7 Live Streaming - CLI Mode
 
 Usage:
   npm run cli -- [options]
   node cli.js [options]
 
 Options:
-  --key, -k <key>        YouTube stream key (required)
+  --key, -k <key>        Stream key (required)
+  --platform, -p <name>  Streaming platform: youtube or facebook (default: youtube)
   --video, -v <files>    Video file(s), comma-separated (required)
   --audio, -a <file>     Audio file for replacement (optional)
   --mute-video           Mute original video audio
@@ -98,14 +105,17 @@ Options:
   --help, -h             Show this help message
 
 Examples:
-  # Single video, infinite loop
-  npm run cli -- --key "YOUR_KEY" --video "video.mp4"
+  # Stream to YouTube (default)
+  npm run cli -- --key "YOUR_YT_KEY" --video "video.mp4"
 
-  # Multiple videos with audio replacement
-  npm run cli -- --key "YOUR_KEY" --video "v1.mp4,v2.mp4" --audio "bgm.mp3" --mute-video
+  # Stream to Facebook
+  npm run cli -- --platform facebook --key "YOUR_FB_KEY" --video "video.mp4"
 
-  # Stream for 24 hours
-  npm run cli -- --key "YOUR_KEY" --video "video.mp4" --duration 24
+  # Multiple videos with audio replacement to Facebook
+  npm run cli -- --platform facebook --key "FB_KEY" --video "v1.mp4,v2.mp4" --audio "bgm.mp3" --mute-video
+
+  # Stream for 24 hours to YouTube
+  npm run cli -- --key "YT_KEY" --video "video.mp4" --duration 24
 
   # Using config file
   npm run cli -- --config stream.json
@@ -115,6 +125,7 @@ Examples:
 
 Config File Format (JSON):
   {
+    "platform": "youtube",
     "streamKey": "YOUR_STREAM_KEY",
     "videos": ["video1.mp4", "video2.mp4"],
     "audio": "bgm.mp3",
@@ -139,6 +150,7 @@ function loadConfigFile(configPath) {
 
         return {
             streamKey: config.streamKey || null,
+            platform: config.platform || 'youtube',
             videos: config.videos || [],
             audio: config.audio || null,
             muteVideo: config.muteVideo || false,
@@ -186,6 +198,14 @@ function validateConfig(config) {
         console.error('\nUse --help for usage information.\n');
         process.exit(1);
     }
+
+    // Validate platform
+    const validPlatforms = ['youtube', 'facebook'];
+    if (!validPlatforms.includes(config.platform)) {
+        console.error(`❌ Invalid platform: ${config.platform}`);
+        console.error(`   Valid platforms: ${validPlatforms.join(', ')}\n`);
+        process.exit(1);
+    }
 }
 
 function log(message, type = 'info') {
@@ -202,7 +222,8 @@ function log(message, type = 'info') {
 }
 
 function startStream(config) {
-    log('Starting YouTube Live Stream...', 'stream');
+    log('Starting Live Stream...', 'stream');
+    log(`Platform: ${config.platform.toUpperCase()}`, 'info');
     log(`Stream Key: ${config.streamKey.substring(0, 8)}...`, 'info');
     log(`Videos: ${config.videos.length} file(s)`, 'info');
     log(`Bitrate: ${config.bitrate}k, FPS: ${config.fps}`, 'info');
@@ -217,7 +238,14 @@ function startStream(config) {
         log('Duration: Infinite (24/7 loop)', 'info');
     }
 
-    const rtmpUrl = `rtmp://a.rtmp.youtube.com/live2/${config.streamKey}`;
+    // Generate RTMP URL based on platform
+    let rtmpUrl;
+    if (config.platform === 'facebook') {
+        rtmpUrl = `rtmps://live-api-s.facebook.com:443/rtmp/${config.streamKey}`;
+    } else {
+        // Default to YouTube
+        rtmpUrl = `rtmp://a.rtmp.youtube.com/live2/${config.streamKey}`;
+    }
 
     // Create uploads directory if not exists
     const uploadsDir = path.join(__dirname, 'uploads');
@@ -355,7 +383,7 @@ function startStream(config) {
 
 // Main execution
 function main() {
-    console.log('🎬 YouTube 24/7 Live Streaming - CLI Mode\n');
+    console.log('🎬 YouTube & Facebook 24/7 Live Streaming - CLI Mode\n');
 
     let config = parseArgs();
 

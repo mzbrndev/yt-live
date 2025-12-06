@@ -4,3 +4,16 @@ uploads/
 .env
 .DS_Store
 *.tar.gz
+
+# Stream configuration (contains sensitive stream keys)
+stream.json
+stream-*.json
+
+# PM2 logs and runtime
+logs/
+.pm2/
+pids/
+*.pid
+
+# Playlist files (auto-generated)
+playlist*.txt

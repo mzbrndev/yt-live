@@ -10,7 +10,9 @@ Aplikasi web untuk streaming video ke YouTube Live secara 24/7 dengan fitur loop
 - 📊 **Real-time Monitoring** - Status streaming real-time dengan WebSocket
 - 🔄 **Auto-reconnect** - Otomatis reconnect jika koneksi terputus
 - 🎨 **Modern Web Interface** - GUI yang indah dan mudah digunakan
+- 💻 **CLI Mode** - Command-line interface untuk VPS/server deployment
 - 📱 **Responsive Design** - Bekerja di desktop, tablet, dan mobile
+
 
 ## 📋 Prerequisites
 
@@ -109,6 +111,300 @@ Sebelum menjalankan aplikasi, pastikan Anda sudah install:
 ### 7. Stop Streaming
 
 Klik tombol **"Stop Streaming"** kapan saja untuk menghentikan stream.
+
+## 💻 CLI Mode (Command Line)
+
+CLI mode memungkinkan Anda menjalankan streaming dari terminal tanpa perlu web interface. Sangat berguna untuk VPS/server deployment.
+
+### Cara Menggunakan CLI
+
+#### 1. Basic Usage
+
+```bash
+# Single video, infinite loop
+npm run cli -- --key "YOUR_STREAM_KEY" --video "video.mp4"
+
+# Multiple videos
+npm run cli -- --key "YOUR_KEY" --video "video1.mp4,video2.mp4"
+
+# Dengan audio replacement
+npm run cli -- --key "YOUR_KEY" --video "video.mp4" --audio "bgm.mp3" --mute-video
+
+# Stream selama 24 jam
+npm run cli -- --key "YOUR_KEY" --video "video.mp4" --duration 24
+
+# Custom bitrate dan FPS
+npm run cli -- --key "YOUR_KEY" --video "video.mp4" --bitrate 1500 --fps 25
+```
+
+#### 2. Menggunakan Config File
+
+Buat file konfigurasi JSON (misalnya `stream.json`):
+
+```json
+{
+  "streamKey": "YOUR_STREAM_KEY",
+  "videos": ["video1.mp4", "video2.mp4"],
+  "audio": "bgm.mp3",
+  "muteVideo": true,
+  "duration": 0,
+  "bitrate": 3000,
+  "fps": 30
+}
+```
+
+Lalu jalankan:
+
+```bash
+npm run cli -- --config stream.json
+```
+
+#### 3. CLI Options
+
+```
+--key, -k <key>        YouTube stream key (required)
+--video, -v <files>    Video file(s), comma-separated (required)
+--audio, -a <file>     Audio file untuk replacement (optional)
+--mute-video           Mute audio video original
+--duration, -d <hours> Durasi streaming dalam jam, 0 = infinite (default: 0)
+--bitrate, -b <kbps>   Video bitrate dalam kbps (default: 3000)
+--fps, -f <fps>        Frame rate (default: 30)
+--config, -c <file>    Load config dari file JSON
+--help, -h             Tampilkan help message
+```
+
+#### 4. Stop Streaming
+
+Tekan `CTRL+C` untuk stop streaming dengan graceful shutdown.
+
+## 🖥️ VPS Deployment
+
+### Deploy ke VPS (Ubuntu/Debian)
+
+#### 1. Setup Awal di VPS
+
+```bash
+# SSH ke VPS
+ssh user@your-vps-ip
+
+# Install Node.js
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Install FFmpeg
+sudo apt update
+sudo apt install ffmpeg -y
+
+# Verifikasi
+node --version
+ffmpeg -version
+```
+
+#### 2. Clone Project
+
+```bash
+# Clone repository (HANYA SEKALI saat pertama kali)
+git clone https://github.com/YOUR_USERNAME/yt-live.git
+cd yt-live
+
+# Install dependencies
+npm install
+```
+
+#### 3. Setup Konfigurasi
+
+```bash
+# Copy example config
+cp stream.example.json stream.json
+
+# Edit config dengan stream key dan video files Anda
+nano stream.json
+```
+
+#### 4. Upload Video Files
+
+Upload video files ke VPS menggunakan SCP atau SFTP:
+
+```bash
+# Dari komputer local
+scp video.mp4 user@vps-ip:/path/to/yt-live/uploads/videos/
+scp bgm.mp3 user@vps-ip:/path/to/yt-live/uploads/audio/
+```
+
+### Running in Background dengan PM2 (Recommended)
+
+PM2 adalah process manager yang akan menjaga stream tetap running bahkan setelah Anda logout dari SSH.
+
+#### Install PM2
+
+```bash
+# Install PM2 globally
+sudo npm install -g pm2
+
+# Atau install sebagai dependency
+npm install
+```
+
+#### Start Stream dengan PM2
+
+```bash
+# Start streaming
+npm run pm2:start
+
+# Atau langsung dengan pm2
+pm2 start ecosystem.config.js
+
+# Lihat status
+npm run pm2:status
+# atau: pm2 status
+
+# Lihat logs real-time
+npm run pm2:logs
+# atau: pm2 logs youtube-stream
+
+# Stop streaming
+npm run pm2:stop
+# atau: pm2 stop youtube-stream
+
+# Restart streaming
+npm run pm2:restart
+# atau: pm2 restart youtube-stream
+```
+
+#### Auto-start PM2 on Boot
+
+```bash
+# Setup PM2 untuk auto-start saat VPS reboot
+pm2 startup
+
+# Save current PM2 process list
+pm2 save
+```
+
+#### PM2 Monitoring
+
+```bash
+# Monitor resource usage
+pm2 monit
+
+# Show detailed info
+pm2 show youtube-stream
+
+# View logs
+pm2 logs youtube-stream --lines 100
+```
+
+### Running in Background dengan systemd
+
+Alternatif untuk PM2, menggunakan systemd (native Linux service).
+
+#### 1. Edit Service File
+
+```bash
+# Copy service file template
+sudo cp youtube-stream.service /etc/systemd/system/
+
+# Edit service file
+sudo nano /etc/systemd/system/youtube-stream.service
+```
+
+Update path dan username di file:
+- `YOUR_USERNAME` → username VPS Anda
+- `/path/to/yt` → path lengkap ke folder project
+
+#### 2. Enable dan Start Service
+
+```bash
+# Reload systemd
+sudo systemctl daemon-reload
+
+# Enable auto-start on boot
+sudo systemctl enable youtube-stream
+
+# Start service
+sudo systemctl start youtube-stream
+
+# Check status
+sudo systemctl status youtube-stream
+
+# View logs
+sudo journalctl -u youtube-stream -f
+
+# Stop service
+sudo systemctl stop youtube-stream
+
+# Restart service
+sudo systemctl restart youtube-stream
+```
+
+### Update Code di VPS
+
+Setelah melakukan perubahan code di local dan push ke GitHub:
+
+```bash
+# SSH ke VPS
+ssh user@vps-ip
+
+# Masuk ke folder project
+cd /path/to/yt-live
+
+# Pull update terbaru
+git pull origin main
+
+# Install dependencies baru (jika ada)
+npm install
+
+# Restart streaming
+# Jika pakai PM2:
+pm2 restart youtube-stream
+
+# Jika pakai systemd:
+sudo systemctl restart youtube-stream
+```
+
+**PENTING:** **TIDAK PERLU** `git clone` lagi! Clone hanya dilakukan sekali saat pertama kali setup. Untuk update selanjutnya cukup `git pull`.
+
+### Monitoring Stream di VPS
+
+#### Dengan PM2
+
+```bash
+# Real-time logs
+pm2 logs youtube-stream
+
+# Monitor CPU/Memory
+pm2 monit
+
+# Status
+pm2 status
+```
+
+#### Dengan systemd
+
+```bash
+# Real-time logs
+sudo journalctl -u youtube-stream -f
+
+# Last 100 lines
+sudo journalctl -u youtube-stream -n 100
+
+# Status
+sudo systemctl status youtube-stream
+```
+
+#### Check FFmpeg Process
+
+```bash
+# Lihat FFmpeg process yang running
+ps aux | grep ffmpeg
+
+# Monitor bandwidth usage
+sudo iftop
+# atau
+sudo nethogs
+```
+
+
 
 ## ⚙️ Konfigurasi FFmpeg
 

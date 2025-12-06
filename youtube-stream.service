@@ -1,0 +1,27 @@
+[Unit]
+Description=YouTube 24/7 Live Streaming Service
+After=network.target
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+WorkingDirectory=/path/to/yt
+ExecStart=/usr/bin/node /path/to/yt/cli.js --config /path/to/yt/stream.json
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/path/to/yt/logs/stream.log
+StandardError=append:/path/to/yt/logs/stream-error.log
+
+# Environment
+Environment=NODE_ENV=production
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Resource limits
+MemoryLimit=1G
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

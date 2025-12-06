@@ -64,50 +64,78 @@ let streamState = {
   maxReconnectAttempts: 10
 };
 
+// Helper function to validate video file
+function validateVideo(videoPath) {
+  return new Promise((resolve, reject) => {
+    ffmpeg.ffprobe(videoPath, (err, metadata) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(metadata);
+      }
+    });
+  });
+}
+
 // API Routes
 
 // Upload video file
-app.post('/api/upload/video', upload.single('video'), (req, res) => {
+app.post('/api/upload/video', upload.single('video'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const videoInfo = {
-    filename: req.file.filename,
-    originalName: req.file.originalname,
-    path: req.file.path,
-    size: req.file.size,
-    thumbnail: null
-  };
+  try {
+    // Validate video file first
+    await validateVideo(req.file.path);
 
-  // Generate thumbnail
-  const thumbnailFilename = `thumb-${req.file.filename}.jpg`;
-  const thumbnailPath = path.join(uploadsDir, 'thumbnails', thumbnailFilename);
+    const videoInfo = {
+      filename: req.file.filename,
+      originalName: req.file.originalname,
+      path: req.file.path,
+      size: req.file.size,
+      thumbnail: null
+    };
 
-  ffmpeg(req.file.path)
-    .on('error', (err) => {
-      console.error('Thumbnail generation error:', err.message);
-      // Don't crash, just continue without thumbnail
-      videoInfo.thumbnail = null;
-    })
-    .screenshots({
-      timestamps: ['50%'],
-      filename: thumbnailFilename,
-      folder: path.join(uploadsDir, 'thumbnails'),
-      size: '320x180'
-    })
-    .on('end', () => {
-      videoInfo.thumbnail = thumbnailFilename;
-      // Update in list if needed (reference is kept)
+    // Generate thumbnail
+    const thumbnailFilename = `thumb-${req.file.filename}.jpg`;
+    const thumbnailPath = path.join(uploadsDir, 'thumbnails', thumbnailFilename);
+
+    ffmpeg(req.file.path)
+      .on('error', (err) => {
+        console.error('Thumbnail generation error:', err.message);
+        // Don't crash, just continue without thumbnail
+        videoInfo.thumbnail = null;
+      })
+      .screenshots({
+        timestamps: ['50%'],
+        filename: thumbnailFilename,
+        folder: path.join(uploadsDir, 'thumbnails'),
+        size: '320x180'
+      })
+      .on('end', () => {
+        videoInfo.thumbnail = thumbnailFilename;
+        // Update in list if needed (reference is kept)
+      });
+
+    streamState.videoList.push(videoInfo);
+
+    res.json({
+      success: true,
+      file: videoInfo,
+      message: 'Video uploaded successfully'
     });
-
-  streamState.videoList.push(videoInfo);
-
-  res.json({
-    success: true,
-    file: videoInfo,
-    message: 'Video uploaded successfully'
-  });
+  } catch (error) {
+    // Video is corrupt or invalid, delete it
+    console.error('Invalid video file:', error.message);
+    if (fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    return res.status(400).json({
+      error: 'Invalid or corrupt video file',
+      details: error.message
+    });
+  }
 });
 
 // Upload custom thumbnail
@@ -450,6 +478,41 @@ function stopStream() {
   });
 }
 
+// Cleanup corrupt videos on startup
+async function cleanupCorruptVideos() {
+  console.log('🔍 Scanning for corrupt videos...');
+
+  if (!fs.existsSync(videosDir)) {
+    return;
+  }
+
+  const files = fs.readdirSync(videosDir);
+  let removedCount = 0;
+
+  for (const file of files) {
+    const filePath = path.join(videosDir, file);
+
+    try {
+      await validateVideo(filePath);
+      console.log(`✓ Valid: ${file}`);
+    } catch (error) {
+      console.log(`✗ Corrupt: ${file} - Removing...`);
+      try {
+        fs.unlinkSync(filePath);
+        removedCount++;
+      } catch (unlinkError) {
+        console.error(`Failed to remove ${file}:`, unlinkError.message);
+      }
+    }
+  }
+
+  if (removedCount > 0) {
+    console.log(`🗑️  Removed ${removedCount} corrupt video(s)`);
+  } else {
+    console.log('✅ All videos are valid');
+  }
+}
+
 // Socket.io connection
 io.on('connection', (socket) => {
   console.log('Client connected');
@@ -467,9 +530,12 @@ io.on('connection', (socket) => {
 });
 
 // Start server
-server.listen(PORT, () => {
+server.listen(PORT, async () => {
   console.log(`🚀 YouTube Live Streaming Server running on http://localhost:${PORT}`);
   console.log(`📹 Upload videos and start streaming!`);
+
+  // Cleanup corrupt videos on startup
+  await cleanupCorruptVideos();
 });
 
 // Cleanup on exit

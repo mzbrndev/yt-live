@@ -344,32 +344,7 @@ sudo systemctl stop youtube-stream
 sudo systemctl restart youtube-stream
 ```
 
-### Update Code di VPS
 
-Setelah melakukan perubahan code di local dan push ke GitHub:
-
-```bash
-# 1. SSH ke VPS
-ssh user@vps-ip
-
-# 2. Masuk ke folder project
-cd /path/to/yt-live
-
-# 3. Pull update terbaru
-git pull origin main
-
-# 4. Install dependencies baru (jika ada)
-npm install
-
-# 5. Restart streaming
-# Jika pakai PM2:
-pm2 restart youtube-stream
-
-# Jika pakai systemd:
-sudo systemctl restart youtube-stream
-```
-
-> **⚠️ PENTING:** **TIDAK PERLU** `git clone` lagi! Clone hanya dilakukan sekali saat pertama kali setup. Untuk update selanjutnya cukup `git pull`.
 
 ### Monitoring Stream di VPS
 

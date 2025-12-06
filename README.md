@@ -13,54 +13,90 @@ Aplikasi web untuk streaming video ke YouTube Live secara 24/7 dengan fitur loop
 - 💻 **CLI Mode** - Command-line interface untuk VPS/server deployment
 - 📱 **Responsive Design** - Bekerja di desktop, tablet, dan mobile
 
+## 📑 Table of Contents
+
+- [Prerequisites](#-prerequisites)
+- [Quick Start](#-quick-start)
+- [Web GUI Mode](#-web-gui-mode)
+- [CLI Mode](#-cli-mode)
+- [VPS Deployment](#️-vps-deployment)
+- [Configuration](#️-configuration)
+- [Troubleshooting](#-troubleshooting)
+- [Tips & Best Practices](#-tips--best-practices)
+
+---
 
 ## 📋 Prerequisites
 
 Sebelum menjalankan aplikasi, pastikan Anda sudah install:
 
-1. **Node.js** (v14 atau lebih baru)
-   ```bash
-   node --version
-   ```
+### 1. Node.js (v14 atau lebih baru)
+```bash
+node --version
+```
 
-2. **FFmpeg** (sangat penting!)
-   - **Ubuntu/Debian:**
-     ```bash
-     sudo apt update
-     sudo apt install ffmpeg
-     ```
-   - **macOS:**
-     ```bash
-     brew install ffmpeg
-     ```
-   - **Windows:**
-     Download dari [ffmpeg.org](https://ffmpeg.org/download.html)
+### 2. FFmpeg (sangat penting!)
 
-   Verifikasi instalasi:
-   ```bash
-   ffmpeg -version
-   ```
+**Ubuntu/Debian:**
+```bash
+sudo apt update
+sudo apt install ffmpeg -y
+```
 
-## 🚀 Cara Install
+**macOS:**
+```bash
+brew install ffmpeg
+```
 
-1. Clone atau download repository ini
+**Windows:**  
+Download dari [ffmpeg.org](https://ffmpeg.org/download.html)
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+**Verifikasi instalasi:**
+```bash
+ffmpeg -version
+```
 
-3. Jalankan server:
-   ```bash
-   npm start
-   ```
+---
 
-4. Buka browser dan akses:
-   ```
-   http://localhost:3000
-   ```
+## 🚀 Quick Start
 
-## 📖 Cara Menggunakan
+### Local Development
+
+```bash
+# 1. Clone repository
+git clone https://github.com/YOUR_USERNAME/yt-live.git
+cd yt-live
+
+# 2. Install dependencies
+npm install
+
+# 3. Start web server
+npm start
+
+# 4. Buka browser
+# http://localhost:3000
+```
+
+### VPS Deployment (Quick)
+
+```bash
+# 1. Clone & install
+git clone https://github.com/YOUR_USERNAME/yt-live.git
+cd yt-live
+npm install
+
+# 2. Setup config
+cp stream.example.json stream.json
+nano stream.json  # Edit dengan stream key Anda
+
+# 3. Start dengan PM2
+sudo npm install -g pm2
+npm run pm2:start
+```
+
+---
+
+## 🎨 Web GUI Mode
 
 ### 1. Dapatkan YouTube Stream Key
 
@@ -68,7 +104,7 @@ Sebelum menjalankan aplikasi, pastikan Anda sudah install:
 2. Pilih menu **Live Streaming** atau **Go Live**
 3. Pilih **Stream** (bukan Webcam)
 4. Copy **Stream Key** Anda
-5. **Penting:** Jangan share stream key ke siapa pun!
+5. ⚠️ **Penting:** Jangan share stream key ke siapa pun!
 
 ### 2. Upload Video
 
@@ -76,8 +112,8 @@ Sebelum menjalankan aplikasi, pastikan Anda sudah install:
 2. Anda bisa upload multiple videos untuk playlist
 3. Video akan di-loop secara berurutan
 
-**Format video yang didukung:**
-- MP4, AVI, MKV, MOV, FLV, WebM, dan lainnya
+**Format video yang didukung:**  
+MP4, AVI, MKV, MOV, FLV, WebM, dan lainnya
 
 ### 3. (Opsional) Ganti Audio
 
@@ -85,40 +121,29 @@ Sebelum menjalankan aplikasi, pastikan Anda sudah install:
 2. Upload file audio (MP3, WAV, dll)
 3. Audio file akan di-loop mengikuti video
 
-### 4. Konfigurasi Stream
+### 4. Mulai Streaming
 
 1. Masukkan **YouTube Stream Key** Anda
 2. Set durasi streaming:
    - **0 atau centang "Infinite Loop"** = streaming 24/7 tanpa batas
    - **Masukkan angka** = streaming X jam lalu otomatis stop
+3. Klik tombol **"Start Streaming"**
+4. Buka [YouTube Live Dashboard](https://studio.youtube.com/channel/UC/livestreaming/manage)
+5. Stream Anda akan muncul!
 
-### 5. Mulai Streaming
-
-1. Klik tombol **"Start Streaming"**
-2. Tunggu beberapa detik
-3. Buka [YouTube Live Dashboard](https://studio.youtube.com/channel/UC/livestreaming/manage)
-4. Stream Anda akan muncul!
-
-### 6. Monitor Status
+### 5. Monitor & Stop
 
 - **Status Indicator** di header menunjukkan apakah stream sedang live
-- **Stream Stats** menampilkan:
-  - Status stream
-  - Video yang sedang diputar
-  - Waktu elapsed
-  - Jumlah video dalam playlist
+- **Stream Stats** menampilkan status, video yang sedang diputar, waktu elapsed
+- Klik **"Stop Streaming"** kapan saja untuk menghentikan stream
 
-### 7. Stop Streaming
+---
 
-Klik tombol **"Stop Streaming"** kapan saja untuk menghentikan stream.
-
-## 💻 CLI Mode (Command Line)
+## 💻 CLI Mode
 
 CLI mode memungkinkan Anda menjalankan streaming dari terminal tanpa perlu web interface. Sangat berguna untuk VPS/server deployment.
 
-### Cara Menggunakan CLI
-
-#### 1. Basic Usage
+### Basic Usage
 
 ```bash
 # Single video, infinite loop
@@ -137,9 +162,9 @@ npm run cli -- --key "YOUR_KEY" --video "video.mp4" --duration 24
 npm run cli -- --key "YOUR_KEY" --video "video.mp4" --bitrate 1500 --fps 25
 ```
 
-#### 2. Menggunakan Config File
+### Menggunakan Config File
 
-Buat file konfigurasi JSON (misalnya `stream.json`):
+Buat file `stream.json`:
 
 ```json
 {
@@ -153,54 +178,53 @@ Buat file konfigurasi JSON (misalnya `stream.json`):
 }
 ```
 
-Lalu jalankan:
-
+Jalankan:
 ```bash
 npm run cli -- --config stream.json
 ```
 
-#### 3. CLI Options
+### CLI Options
 
-```
---key, -k <key>        YouTube stream key (required)
---video, -v <files>    Video file(s), comma-separated (required)
---audio, -a <file>     Audio file untuk replacement (optional)
---mute-video           Mute audio video original
---duration, -d <hours> Durasi streaming dalam jam, 0 = infinite (default: 0)
---bitrate, -b <kbps>   Video bitrate dalam kbps (default: 3000)
---fps, -f <fps>        Frame rate (default: 30)
---config, -c <file>    Load config dari file JSON
---help, -h             Tampilkan help message
-```
+| Option | Alias | Description | Default |
+|--------|-------|-------------|---------|
+| `--key` | `-k` | YouTube stream key (required) | - |
+| `--video` | `-v` | Video file(s), comma-separated (required) | - |
+| `--audio` | `-a` | Audio file untuk replacement | - |
+| `--mute-video` | - | Mute audio video original | false |
+| `--duration` | `-d` | Durasi streaming dalam jam (0 = infinite) | 0 |
+| `--bitrate` | `-b` | Video bitrate dalam kbps | 3000 |
+| `--fps` | `-f` | Frame rate | 30 |
+| `--config` | `-c` | Load config dari file JSON | - |
+| `--help` | `-h` | Tampilkan help message | - |
 
-#### 4. Stop Streaming
+### Stop Streaming
 
 Tekan `CTRL+C` untuk stop streaming dengan graceful shutdown.
 
+---
+
 ## 🖥️ VPS Deployment
 
-### Deploy ke VPS (Ubuntu/Debian)
-
-#### 1. Setup Awal di VPS
+### Setup Awal di VPS
 
 ```bash
-# SSH ke VPS
+# 1. SSH ke VPS
 ssh user@your-vps-ip
 
-# Install Node.js
+# 2. Install Node.js
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install FFmpeg
+# 3. Install FFmpeg
 sudo apt update
 sudo apt install ffmpeg -y
 
-# Verifikasi
+# 4. Verifikasi
 node --version
 ffmpeg -version
 ```
 
-#### 2. Clone Project
+### Clone Project (Pertama Kali)
 
 ```bash
 # Clone repository (HANYA SEKALI saat pertama kali)
@@ -211,7 +235,7 @@ cd yt-live
 npm install
 ```
 
-#### 3. Setup Konfigurasi
+### Setup Konfigurasi
 
 ```bash
 # Copy example config
@@ -221,9 +245,9 @@ cp stream.example.json stream.json
 nano stream.json
 ```
 
-#### 4. Upload Video Files
+### Upload Video Files
 
-Upload video files ke VPS menggunakan SCP atau SFTP:
+Upload video files ke VPS menggunakan SCP:
 
 ```bash
 # Dari komputer local
@@ -231,58 +255,43 @@ scp video.mp4 user@vps-ip:/path/to/yt-live/uploads/videos/
 scp bgm.mp3 user@vps-ip:/path/to/yt-live/uploads/audio/
 ```
 
-### Running in Background dengan PM2 (Recommended)
+### Running in Background
+
+#### Option 1: PM2 (Recommended)
 
 PM2 adalah process manager yang akan menjaga stream tetap running bahkan setelah Anda logout dari SSH.
 
-#### Install PM2
-
+**Install PM2:**
 ```bash
-# Install PM2 globally
 sudo npm install -g pm2
-
-# Atau install sebagai dependency
-npm install
 ```
 
-#### Start Stream dengan PM2
-
+**Start & Manage Stream:**
 ```bash
 # Start streaming
 npm run pm2:start
 
-# Atau langsung dengan pm2
-pm2 start ecosystem.config.js
-
 # Lihat status
 npm run pm2:status
-# atau: pm2 status
 
 # Lihat logs real-time
 npm run pm2:logs
-# atau: pm2 logs youtube-stream
 
 # Stop streaming
 npm run pm2:stop
-# atau: pm2 stop youtube-stream
 
 # Restart streaming
 npm run pm2:restart
-# atau: pm2 restart youtube-stream
 ```
 
-#### Auto-start PM2 on Boot
-
+**Auto-start on Boot:**
 ```bash
 # Setup PM2 untuk auto-start saat VPS reboot
 pm2 startup
-
-# Save current PM2 process list
 pm2 save
 ```
 
-#### PM2 Monitoring
-
+**Monitoring:**
 ```bash
 # Monitor resource usage
 pm2 monit
@@ -294,12 +303,11 @@ pm2 show youtube-stream
 pm2 logs youtube-stream --lines 100
 ```
 
-### Running in Background dengan systemd
+#### Option 2: systemd
 
 Alternatif untuk PM2, menggunakan systemd (native Linux service).
 
-#### 1. Edit Service File
-
+**Setup Service:**
 ```bash
 # Copy service file template
 sudo cp youtube-stream.service /etc/systemd/system/
@@ -312,8 +320,7 @@ Update path dan username di file:
 - `YOUR_USERNAME` → username VPS Anda
 - `/path/to/yt` → path lengkap ke folder project
 
-#### 2. Enable dan Start Service
-
+**Manage Service:**
 ```bash
 # Reload systemd
 sudo systemctl daemon-reload
@@ -342,19 +349,19 @@ sudo systemctl restart youtube-stream
 Setelah melakukan perubahan code di local dan push ke GitHub:
 
 ```bash
-# SSH ke VPS
+# 1. SSH ke VPS
 ssh user@vps-ip
 
-# Masuk ke folder project
+# 2. Masuk ke folder project
 cd /path/to/yt-live
 
-# Pull update terbaru
+# 3. Pull update terbaru
 git pull origin main
 
-# Install dependencies baru (jika ada)
+# 4. Install dependencies baru (jika ada)
 npm install
 
-# Restart streaming
+# 5. Restart streaming
 # Jika pakai PM2:
 pm2 restart youtube-stream
 
@@ -362,63 +369,72 @@ pm2 restart youtube-stream
 sudo systemctl restart youtube-stream
 ```
 
-**PENTING:** **TIDAK PERLU** `git clone` lagi! Clone hanya dilakukan sekali saat pertama kali setup. Untuk update selanjutnya cukup `git pull`.
+> **⚠️ PENTING:** **TIDAK PERLU** `git clone` lagi! Clone hanya dilakukan sekali saat pertama kali setup. Untuk update selanjutnya cukup `git pull`.
 
 ### Monitoring Stream di VPS
 
-#### Dengan PM2
-
+**Dengan PM2:**
 ```bash
-# Real-time logs
-pm2 logs youtube-stream
-
-# Monitor CPU/Memory
-pm2 monit
-
-# Status
-pm2 status
+pm2 logs youtube-stream    # Real-time logs
+pm2 monit                   # Monitor CPU/Memory
+pm2 status                  # Status
 ```
 
-#### Dengan systemd
-
+**Dengan systemd:**
 ```bash
-# Real-time logs
-sudo journalctl -u youtube-stream -f
-
-# Last 100 lines
-sudo journalctl -u youtube-stream -n 100
-
-# Status
-sudo systemctl status youtube-stream
+sudo journalctl -u youtube-stream -f         # Real-time logs
+sudo journalctl -u youtube-stream -n 100     # Last 100 lines
+sudo systemctl status youtube-stream         # Status
 ```
 
-#### Check FFmpeg Process
-
+**Check FFmpeg Process:**
 ```bash
-# Lihat FFmpeg process yang running
-ps aux | grep ffmpeg
-
-# Monitor bandwidth usage
-sudo iftop
-# atau
-sudo nethogs
+ps aux | grep ffmpeg        # Lihat FFmpeg process
+sudo iftop                  # Monitor bandwidth
+sudo nethogs                # Monitor bandwidth per process
 ```
 
+---
 
+## ⚙️ Configuration
 
-## ⚙️ Konfigurasi FFmpeg
+### FFmpeg Settings
 
 Aplikasi ini menggunakan setting FFmpeg yang dioptimasi untuk YouTube:
 
+| Setting | Value |
+|---------|-------|
+| Video Codec | H.264 (libx264) |
+| Video Bitrate | 3000k (default) |
+| Resolution | Mengikuti video source |
+| Frame Rate | 30 fps (default) |
+| Audio Codec | AAC |
+| Audio Bitrate | 128k |
+| Sample Rate | 44100 Hz |
+
+### Optimasi Bitrate
+
+Jika bandwidth terbatas, sesuaikan bitrate:
+
+| Quality | Bitrate | Upload Speed |
+|---------|---------|--------------|
+| 1080p | 3000k | ~5 Mbps |
+| 720p | 1500k | ~3 Mbps |
+| 480p | 1000k | ~2 Mbps |
+
+**Via CLI:**
+```bash
+npm run cli -- --key "YOUR_KEY" --video "video.mp4" --bitrate 1500
 ```
-Video Codec: H.264 (libx264)
-Video Bitrate: 3000k (max)
-Resolution: Mengikuti video source
-Frame Rate: 30 fps
-Audio Codec: AAC
-Audio Bitrate: 128k
-Sample Rate: 44100 Hz
+
+**Via Config File:**
+```json
+{
+  "bitrate": 1500
+}
 ```
+
+---
 
 ## 🔧 Troubleshooting
 
@@ -427,11 +443,11 @@ Sample Rate: 44100 Hz
 1. **Cek stream key** - Pastikan stream key Anda benar
 2. **Aktifkan live streaming** - Pertama kali menggunakan YouTube Live, harus tunggu verifikasi 24 jam
 3. **Cek koneksi internet** - Pastikan upload speed minimal 5 Mbps
-4. **Lihat console log** - Jalankan dengan `npm start` dan cek error messages
+4. **Lihat console log** - Cek error messages di terminal atau PM2 logs
 
 ### FFmpeg error: Command not found
 
-FFmpeg belum terinstall. Install FFmpeg terlebih dahulu (lihat Prerequisites di atas).
+FFmpeg belum terinstall. Install FFmpeg terlebih dahulu (lihat [Prerequisites](#-prerequisites)).
 
 ### Video tidak ter-encode dengan benar
 
@@ -443,7 +459,7 @@ FFmpeg belum terinstall. Install FFmpeg terlebih dahulu (lihat Prerequisites di 
 
 1. Cek koneksi internet Anda
 2. Auto-reconnect akan mencoba reconnect otomatis (max 10x)
-3. Kurangi bitrate di `server.js` jika bandwidth terbatas
+3. Kurangi bitrate jika bandwidth terbatas
 
 ### Upload file gagal
 
@@ -451,53 +467,41 @@ FFmpeg belum terinstall. Install FFmpeg terlebih dahulu (lihat Prerequisites di 
 2. Pastikan format file didukung
 3. Cek disk space tersedia
 
+---
+
 ## 🎯 Tips & Best Practices
 
-### Optimasi Quality vs Bandwidth
+### 24/7 Streaming
 
-Jika bandwidth terbatas, edit `server.js` line ~185:
-```javascript
-// Dari:
-ffmpegArgs.push('-maxrate', '3000k');
-
-// Jadi (untuk low bandwidth):
-ffmpegArgs.push('-maxrate', '1500k');
-```
-
-### Multiple Quality Versions
-
-Buat video dalam multiple resolusi dan pilih sesuai bandwidth:
-- **1080p** = 3000k bitrate (butuh ~5 Mbps upload)
-- **720p** = 1500k bitrate (butuh ~3 Mbps upload)
-- **480p** = 1000k bitrate (butuh ~2 Mbps upload)
-
-### 24/7 Streaming Tips
-
-1. **Gunakan VPS/Server** - Jangan gunakan PC pribadi
-2. **Stable connection** - Pastikan koneksi internet stabil
-3. **Monitor regularly** - Cek stream status secara berkala
-4. **Backup videos** - Simpan backup video files Anda
-5. **Test terlebih dahulu** - Test dengan 1-2 jam dulu sebelum 24/7
+1. ✅ **Gunakan VPS/Server** - Jangan gunakan PC pribadi
+2. ✅ **Stable connection** - Pastikan koneksi internet stabil
+3. ✅ **Monitor regularly** - Cek stream status secara berkala
+4. ✅ **Backup videos** - Simpan backup video files Anda
+5. ✅ **Test terlebih dahulu** - Test dengan 1-2 jam dulu sebelum 24/7
 
 ### Playlist Management
 
 - **Single video loop** - Upload 1 video saja
 - **Multiple videos** - Upload 2+ videos, akan play berurutan lalu loop
-- **Urutan** - Video diputar sesuai urutan upload (belum bisa reorder)
+- **Urutan** - Video diputar sesuai urutan upload
 
-## 📊 Resource Usage
+### Resource Usage
 
-**RAM:** ~200-500 MB (tergantung video quality)  
-**CPU:** ~20-40% (1 core, tergantung encoding settings)  
-**Bandwidth:** ~3-5 Mbps upload (untuk 1080p 30fps)  
-**Disk:** Sesuai ukuran video files
+| Resource | Usage |
+|----------|-------|
+| RAM | ~200-500 MB (tergantung video quality) |
+| CPU | ~20-40% (1 core, tergantung encoding) |
+| Bandwidth | ~3-5 Mbps upload (untuk 1080p 30fps) |
+| Disk | Sesuai ukuran video files |
 
-## 🔒 Keamanan
+### Keamanan
 
-- **Jangan commit stream key** ke Git
-- **Gunakan .env** untuk menyimpan sensitive data
-- **Jangan share stream key** ke orang lain
-- **Ganti stream key** secara berkala
+- ❌ **Jangan commit stream key** ke Git
+- ✅ **File `stream.json` sudah di-gitignore**
+- ❌ **Jangan share stream key** ke orang lain
+- ✅ **Ganti stream key** secara berkala
+
+---
 
 ## 🛠️ Development
 
@@ -505,32 +509,40 @@ Buat video dalam multiple resolusi dan pilih sesuai bandwidth:
 
 ```
 yt/
-├── server.js           # Backend server (Express + FFmpeg)
-├── package.json        # Dependencies
+├── server.js              # Backend server (Express + FFmpeg)
+├── cli.js                 # CLI mode entry point
+├── package.json           # Dependencies & scripts
+├── ecosystem.config.js    # PM2 configuration
+├── youtube-stream.service # systemd service template
+├── stream.example.json    # Example config file
 ├── public/
-│   ├── index.html      # Frontend UI
-│   ├── style.css       # Styling
-│   └── app.js          # Frontend logic
-└── uploads/            # Uploaded files (auto-created)
+│   ├── index.html         # Frontend UI
+│   ├── style.css          # Styling
+│   └── app.js             # Frontend logic
+└── uploads/               # Uploaded files (auto-created)
     ├── videos/
     └── audio/
 ```
 
 ### API Endpoints
 
-- `POST /api/upload/video` - Upload video file
-- `POST /api/upload/audio` - Upload audio file
-- `GET /api/files` - Get uploaded files
-- `DELETE /api/video/:filename` - Remove video
-- `DELETE /api/audio` - Remove audio
-- `POST /api/stream/start` - Start streaming
-- `POST /api/stream/stop` - Stop streaming
-- `GET /api/stream/status` - Get stream status
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/upload/video` | Upload video file |
+| POST | `/api/upload/audio` | Upload audio file |
+| GET | `/api/files` | Get uploaded files |
+| DELETE | `/api/video/:filename` | Remove video |
+| DELETE | `/api/audio` | Remove audio |
+| POST | `/api/stream/start` | Start streaming |
+| POST | `/api/stream/stop` | Stop streaming |
+| GET | `/api/stream/status` | Get stream status |
 
 ### WebSocket Events
 
 - `stream-update` - Stream status updates
 - `stream-error` - Stream error notifications
+
+---
 
 ## 📝 License
 
@@ -546,7 +558,7 @@ Contributions are welcome! Feel free to:
 ## 💡 Support
 
 Jika ada masalah atau pertanyaan:
-1. Cek section **Troubleshooting** di atas
+1. Cek section [Troubleshooting](#-troubleshooting) di atas
 2. Lihat console logs untuk error details
 3. Buat issue di repository
 
